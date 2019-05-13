@@ -28,8 +28,8 @@ from ..util import simplify, const_matrix, get_const_tuple
 
 # workload description of conv2d
 Workload = namedtuple('Workload',
-                      ['in_dtype', 'out_dtype', 'height', 'width', 'in_filter', 'out_filter',
-                       'hkernel', 'wkernel', 'hpad', 'wpad', 'hstride', 'wstride'])
+                      ['in_dtype', 'out_dtype', 'height', 'width', 'in_filter', 'groups',
+                       'out_filter', 'hkernel', 'wkernel', 'hpad', 'wpad', 'hstride', 'wstride'])
 
 @tvm.target.generic_func
 def conv2d(input, filter, strides, padding, dilation, layout='NCHW', out_dtype=None):
@@ -98,8 +98,9 @@ def conv2d_alter_layout(attrs, inputs, tinfos, F):
 def _get_workload(data, kernel, stride, padding, out_dtype):
     """ Get the workload structure. """
     _, CI, IH, IW = [x.value for x in data.shape]
-    CO, _, KH, KW = [x.value for x in kernel.shape]
+    CO, CIG, KH, KW = [x.value for x in kernel.shape]
     HPAD, WPAD, _, _ = get_pad_tuple(padding, kernel)
+    GRPS = CI // CIG
     if isinstance(stride, (tuple, list)):
         HSTR, WSTR = stride
     else:
@@ -107,7 +108,7 @@ def _get_workload(data, kernel, stride, padding, out_dtype):
     assert (data.dtype == kernel.dtype) or (data.dtype == 'uint8' and kernel.dtype == 'int8'), \
         "Do not support inputs with different data types now. ' \
         '{} vs. {}".format(data.dtype, kernel.dtype)
-    return Workload(data.dtype, out_dtype, IH, IW, CI, CO, KH, KW, HPAD, WPAD, HSTR, WSTR)
+    return Workload(data.dtype, out_dtype, IH, IW, CI, GRPS, CO, KH, KW, HPAD, WPAD, HSTR, WSTR)
 
 
 def conv2d_nchw(Input, Filter, stride, padding, dilation, out_dtype=None):
@@ -561,6 +562,11 @@ def group_conv2d_nchw(Input, Filter, stride, padding, dilation, groups, out_dtyp
     Output : tvm.Tensor
         4-D with shape [batch, out_channel, out_height, out_width]
     """
+    # raise ValueError("missing register for topi.nn.group_conv2d_nchw")
+    return group_conv2d_nchw_impl(Input, Filter, stride, padding, dilation, groups, out_dtype)
+
+
+def group_conv2d_nchw_impl(Input, Filter, stride, padding, dilation, groups, out_dtype=None):
     if out_dtype is None:
         out_dtype = Input.dtype
     assert isinstance(stride, int) or len(stride) == 2
