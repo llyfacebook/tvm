@@ -531,6 +531,11 @@ def conv2d_winograd_nnpack_without_weight_transform(
 
 
 @tvm.target.generic_func
+def group_conv2d_NCHWc(data, kernel, stride, padding, dilation, layout, out_layout, out_dtype='float32'):
+    raise ValueError("missing register for topi.nn.group_conv2d_NCHWc")
+
+
+@tvm.target.generic_func
 def group_conv2d_nchw(Input, Filter, stride, padding, dilation, groups, out_dtype=None):
     """Group convolution operator in NCHW layout.
 
