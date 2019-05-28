@@ -93,19 +93,6 @@ def _create_tuning_space(cfg, data, kernel, strides, padding, dilation, layout):
         cfg.define_knob("unroll_kw", [True, False])
 
 
-@autotvm.register_topi_compute(group_conv2d_nchw, 'cpu', 'direct')
-def _declaration_group_conv2d_nchw(cfg, data, kernel, strides, padding, dilation, groups, out_dtype):
-    out_dtype = data.dtype if out_dtype is None else out_dtype
-    padding = padding if isinstance(padding, (tuple, list)) else (padding, padding)
-    strides = strides if isinstance(strides, (tuple, list)) else (strides, strides)
-    dilation = dilation if isinstance(dilation, (tuple, list)) else (dilation, dilation)
-    layout = "NCHW"
-    _create_tuning_space(cfg, data, kernel, strides, padding, dilation, layout)
-    if cfg.is_fallback:
-        _get_default_config(cfg, data, kernel, strides, padding, out_dtype)
-    return nn.group_conv2d_nchw_impl(data, kernel, strides, padding, dilation, groups, out_dtype)
-
-
 @autotvm.register_topi_compute(conv2d, 'cpu', 'direct')
 def _declaration_conv(cfg, data, kernel, strides, padding, dilation, layout, out_dtype):
     out_dtype = data.dtype if out_dtype is None else out_dtype
@@ -389,7 +376,6 @@ def _alter_conv2d_layout(attrs, inputs, tinfo, F):
 
     new_data = tvm.placeholder((batch_size, in_channel//ic_bn, height, width, ic_bn),
                                dtype=data.dtype)
-
     if is_depthwise:
         new_attrs['kernel_layout'] = 'OIHW1i%do' % oc_bn
         # Store altered operator's config

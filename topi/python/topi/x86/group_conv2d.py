@@ -214,7 +214,7 @@ def _topi_nn_group_conv2d_NCHWc(*args, **kwargs):
 
     # get config here
     cfg = get_config()
-    cfg.define_split("tile_ic", in_channel, num_outputs=2)
+    cfg.define_split("tile_ic", in_channel, num_outputs=2, filter=lambda y: in_channel_per_group % y.size[-1] == 0)
     cfg.define_split("tile_oc", out_channel, num_outputs=2)
     cfg.define_split("tile_ow", out_width, num_outputs=2, filter=lambda y: y.size[-1] <= 64)
 
