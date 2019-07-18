@@ -1194,3 +1194,33 @@ def deformable_conv2d(data,
     return _make.deformable_conv2d(data, offset, weight, strides, padding, dilation,
                                    deformable_groups, groups, channels, kernel_size, data_layout,
                                    kernel_layout, out_layout, out_dtype)
+
+def contrib_quantize_data_int8_quantize(data, zero_point, scale, is_signed, precision):
+    r"""weight or activation dynamic quantiation into int8.
+
+    We separate this as a single op to enable pre-compute for inference.
+    Use this together with nn.contrib_quantize_data_int8_quantize
+
+    Parameters
+    ----------
+    data : tvm.relay.Expr
+        The weight expressions.
+
+    Returns
+    -------
+    result : tvm.relay.Expr
+        The computed result.
+    """
+    return TupleWrapper(_make.contrib_quantize_data_int8_quantize(data, zero_point, scale, is_signed, precision), 2)
+
+
+def contrib_choose_quantize_params(data_min, data_max, is_signed, precision):
+    return TupleWrapper(_make.contrib_choose_quantize_params(data_min, data_max, is_signed, precision), 2)
+
+
+def contrib_quantize_data_mm_dequantize(weight, data, weight_acc, data_acc, weight_scale, activation_scale, weight_zero_point, activation_zero_point):
+    return _make.contrib_quantize_data_mm_dequantize(weight, data, weight_acc, data_acc, weight_scale, activation_scale, weight_zero_point, activation_zero_point)
+
+
+def contrib_quantize_findminmax(data):
+    return TupleWrapper(_make.contrib_quantize_findminmax(data), 2)

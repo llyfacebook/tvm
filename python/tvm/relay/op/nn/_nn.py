@@ -451,3 +451,68 @@ def schedule_deformable_conv2d(attrs, outs, target):
         return topi.generic.schedule_deformable_conv2d_nchw(outs)
 
 reg.register_pattern("nn.deformable_conv2d", OpPattern.OUT_ELEMWISE_FUSABLE)
+
+
+@reg.register_compute("nn.contrib_quantize_data_int8_quantize")
+def compute_contrib_quantize_data_int8_quantize(attrs, inputs, out_dtype, target):
+    """Compute definition of contrib_quantize_data_int8_quantize"""
+    precision = attrs.get_int('precision')
+    is_signed = attrs.get_int('is_signed')
+    return topi.nn.data_int8_quantize(inputs[0], inputs[1], inputs[2], is_signed, precision)
+
+@reg.register_schedule("nn.contrib_quantize_data_int8_quantize")
+def schedule_contrib_quantize_data_int8_quantize(attrs, outs, target):
+    """Schedule definition of contrib_quantize_data_int8_quantize"""
+    with target:
+        return topi.generic.schedule_data_int8_quantize(outs)
+
+
+reg.register_pattern("nn.contrib_quantize_data_int8_quantize", OpPattern.OPAQUE)
+
+
+@reg.register_compute("nn.contrib_quantize_data_mm_dequantize")
+def compute_contrib_quantize_data_mm_dequantize(attrs, inputs, out_dtype, target):
+    """Compute definition of contrib_quantize_data_mm_dequantize"""
+    return topi.nn.data_mm_dequantize(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6], inputs[7])
+
+
+@reg.register_schedule("nn.contrib_quantize_data_mm_dequantize")
+def schedule_contrib_quantize_data_mm_dequantize(attrs, outs, target):
+    """Schedule definition of contrib_quantize_data_dequantize"""
+    with target:
+        return topi.generic.schedule_data_mm_dequantize(outs)
+
+
+reg.register_pattern("nn.contrib_quantize_data_mm_dequantize", OpPattern.OPAQUE)
+
+
+@reg.register_compute("nn.contrib_quantize_findminmax")
+def compute_contrib_quantize_findminmax(attrs, inputs, out_dtype, target):
+    """Compute definition of contrib_quantize_findminmax"""
+    return topi.nn.quantize_findminmax(inputs[0])
+
+@reg.register_schedule("nn.contrib_quantize_findminmax")
+def schedule_contrib_quantize_findminmax(attrs, outs, target):
+    """Schedule definition of contrib_quantize_findminmax"""
+    with target:
+        return topi.generic.schedule_findminmax(outs)
+
+
+reg.register_pattern("nn.contrib_quantize_findminmax", OpPattern.OPAQUE)
+
+
+@reg.register_compute("nn.contrib_choose_quantize_params")
+def compute_contrib_choose_quantize_params(attrs, inputs, out_dtype, target):
+    """Compute definition of contrib_choose_quantize_params"""
+    precision = attrs.get_int('precision')
+    is_signed = attrs.get_int('is_signed')
+    return topi.nn.choose_quantize_params(inputs[0], inputs[1], is_signed, precision)
+
+
+@reg.register_schedule("nn.contrib_choose_quantize_params")
+def schedule_contrib_choose_quantize_params(attrs, outs, target):
+    """Schedule definition of contrib_choose_quantize_params"""
+    with target:
+        return topi.generic.schedule_choose_quantize_params(outs)
+
+reg.register_pattern("nn.contrib_choose_quantize_params", OpPattern.OPAQUE)

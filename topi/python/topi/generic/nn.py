@@ -483,3 +483,19 @@ def schedule_batch_matmul(outs):
     target = tvm.target.current_target(allow_none=False)
     cpp_target = cpp.TEST_create_target(target.target_name)
     return cpp.generic.default_schedule(cpp_target, outs, False)
+
+@tvm.target.generic_func
+def schedule_data_int8_quantize(outs):
+    return _default_schedule(outs, False)
+
+@tvm.target.generic_func
+def schedule_findminmax(outs):
+    return _default_schedule(outs, False)
+
+@tvm.target.generic_func
+def schedule_data_mm_dequantize(outs):
+    return _default_schedule(outs, False)
+
+@tvm.target.generic_func
+def schedule_choose_quantize_params(outs):
+    return _default_schedule(outs, False)

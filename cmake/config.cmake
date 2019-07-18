@@ -129,5 +129,8 @@ set(USE_ROCBLAS OFF)
 # Whether use contrib sort
 set(USE_SORT ON)
 
+# Whether include the quantized kernel
+set(USE_QUANTIZE ON)
+
 # Build ANTLR parser for Relay text format
 set(USE_ANTLR OFF)

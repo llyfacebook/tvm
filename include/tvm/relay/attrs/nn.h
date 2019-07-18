@@ -535,6 +535,21 @@ struct DeformableConv2DAttrs : public tvm::AttrsNode<DeformableConv2DAttrs> {
   }
 };
 
+
+/*! \brief Attributes for contrib_choose_quantize_params  operator */
+struct QuantizedParamsAttrs : public tvm::AttrsNode<QuantizedParamsAttrs> {
+  int precision;
+  bool is_signed;
+
+  TVM_DECLARE_ATTRS(QuantizedParamsAttrs, "relay.attrs.QuantizedParamsAttrs") {
+    TVM_ATTR_FIELD(precision).set_default(8)
+      .describe("The integer precision we want to quantize to.");
+    TVM_ATTR_FIELD(is_signed).set_default(false)
+      .describe("Signed or unsigned integer we want to quantize to.");
+  }
+};
+
+
 }  // namespace relay
 }  // namespace tvm
 #endif  // TVM_RELAY_ATTRS_NN_H_
