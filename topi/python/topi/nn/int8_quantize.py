@@ -62,12 +62,13 @@ def data_mm_dequantize(weight, data, weight_acc, data_acc, weight_scale, activat
                     name='quantized_mm', tag='quantized_mm')
 
     scale_multiply = tvm.compute((1, ), \
-                         lambda i: (weight_scale[i] * activation_scale[i]), \
+                         lambda _: (weight_scale[0] * activation_scale[0]), \
                          name = 'scale_multiply', tag='scale_multiply')
 
     zero_point_mulitply = tvm.compute((1, ), \
-                         lambda i: (weight_zero_point[i] * activation_zero_point[i] * K).astype("float32"), \
+                        lambda _:(weight_zero_point[0] * activation_zero_point[0] * K).astype("float32"), \
                          name = 'zero_point_multiply', tag='zero_point_multiply')
+
     # need find tuning, we may decompose the complex computation.
     result = tvm.compute((M, N), \
                      lambda i, j: scale_multiply[0]*(quantized_mm[i][j].astype("float32") - \
